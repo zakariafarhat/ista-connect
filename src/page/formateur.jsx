@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
 import {
   Plus,
@@ -44,6 +43,86 @@ function Formateur() {
   const [recherche, setRecherche] = useState("");
   const [specialite, setSpecialite] = useState("Toutes les specialites");
   const [statut, setStatut] = useState("Tous les statuts");
+  const [nom, setNom] = useState("");
+  const [email, setEmail] = useState("");
+  const [specialiteForm, setSpecialiteForm] = useState("Développement");
+  const [statutForm, setStatutForm] = useState("Actif");
+
+  const [vue, setVue] = useState("liste");
+  const [idModification, setIdModification] = useState(null);
+  const [prochainId, setProchainId] = useState(5);
+
+  function ouvrirAjout() {
+    setNom("");
+    setEmail("");
+    setSpecialiteForm("Développement");
+    setStatutForm("Actif");
+    setIdModification(null);
+    setVue("formulaire");
+  }
+
+  function ouvrirModification(e) {
+    setNom(e.nom);
+    setEmail(e.email);
+    setSpecialiteForm(e.specialite);
+    setStatutForm(e.statut);
+    setIdModification(e.id);
+    setVue("formulaire");
+  }
+
+
+  function ajouter() {
+
+    setFormateur([
+      ...formateur,
+      {
+        id: prochainId,
+        nom: nom,
+        email: email,
+        specialite: specialiteForm,
+        statut: statutForm
+      }
+    ]);
+
+    setProchainId(prochainId + 1);
+  }
+
+  function modifier() {
+
+    setFormateur(
+      formateur.map(e => {
+
+        if (e.id === idModification) {
+          return {
+            ...e,
+            nom: nom,
+            email: email,
+            specialite: specialiteForm,
+            statut: statutForm
+          };
+        }
+
+        return e;
+      })
+    );
+
+  }
+
+  function enregistrer(event) {
+
+    event.preventDefault();
+
+    if (idModification === null) {
+      ajouter();
+    } else {
+      modifier();
+    }
+
+    setRecherche("");
+    setSpecialite("Toutes les specialites");
+    setStatut("Tous les statuts");
+    setVue("liste");
+  }
 
   const formateursFiltres = formateur.filter((e) => {
     return (
@@ -57,12 +136,115 @@ function Formateur() {
     setFormateur(formateur.filter((e) => e.id !== id));
   };
 
+
+  if (vue === "formulaire") {
+
+    let titre = "Ajouter un formateur";
+
+    if (idModification !== null) {
+      titre = "Modifier un formateur";
+    }
+
+    return (
+      <div className="space-y-5">
+
+        <h1 className="text-2xl font-bold text-gray-800">
+          {titre}
+        </h1>
+
+        <form
+          onSubmit={enregistrer}
+          className="bg-white border border-gray-200 rounded-xl p-5 space-y-5"
+        >
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <label className="block text-gray-600">
+              Nom complet
+
+              <input
+                type="text"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+            </label>
+
+            <label className="block text-gray-600">
+              Email
+
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+            </label>
+
+            <label className="block text-gray-600">
+              Spécialité
+
+              <select
+                value={specialiteForm}
+                onChange={(e) => setSpecialiteForm(e.target.value)}
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              >
+                <option>Développement</option>
+                <option>Réseaux et Sécurité</option>
+                <option>Infographie</option>
+                <option>Maintenance</option>
+              </select>
+            </label>
+
+            <label className="block text-gray-600">
+              Statut
+
+              <select
+                value={statutForm}
+                onChange={(e) => setStatutForm(e.target.value)}
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              >
+                <option>Actif</option>
+                <option>Inactif</option>
+                <option>En attente</option>
+              </select>
+            </label>
+
+          </div>
+
+          <div className="flex flex-wrap gap-3 justify-end">
+
+            <button
+              type="button"
+              onClick={() => setVue("liste")}
+              className="border border-gray-200 rounded-lg px-5 py-3"
+            >
+              Annuler
+            </button>
+
+            <button
+              type="submit"
+              className="bg-blue-600 text-white rounded-lg px-5 py-3 hover:bg-blue-700"
+            >
+              Enregistrer
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
 
-      {/* phase 1  */}
+      {/* heade */}
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap gap-4 justify-between items-center">
 
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
@@ -74,45 +256,54 @@ function Formateur() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-blue-600 rounded-lg text-white px-5 py-3 hover:bg-blue-700 duration-300">
+        <button
+          type="button"
+          onClick={ouvrirAjout}
+          className="flex items-center gap-2 bg-blue-600 rounded-lg text-white px-5 py-3 hover:bg-blue-700 duration-300"
+        >
           <Plus size={20} />
           Ajouter un formateur
         </button>
 
       </div>
 
+      {/* 2 */}
 
-      {/* phase2*/}
-
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
         <div className="bg-white p-5 rounded-xl border border-gray-200">
-          <p className="text-gray-500">Total formateurs</p>
-          <h2 className="text-2xl font-bold ">
+          <p className="text-gray-500">
+            Total formateurs
+          </p>
+
+          <h2 className="text-2xl font-bold">
             {formateur.length}
           </h2>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-gray-200">
-          <p className="text-gray-500">Formateurs actifs</p>
-          <h2 className="text-2xl font-bold ">
+          <p className="text-gray-500">
+            Formateurs actifs
+          </p>
+
+          <h2 className="text-2xl font-bold">
             {formateur.filter(e => e.statut === "Actif").length}
           </h2>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-gray-200">
-          <p className="text-gray-500">Formateurs inactifs</p>
-          <h2 className="text-2xl font-bold ">
+          <p className="text-gray-500">
+            Formateurs inactifs
+          </p>
+
+          <h2 className="text-2xl font-bold">
             {formateur.filter(e => e.statut === "Inactif").length}
           </h2>
         </div>
 
       </div>
-
-
-      {/* phase 3 */}
-
-      <div className="grid grid-cols-3 gap-5 bg-white p-4 rounded-xl border border-gray-200">
+    {/*3 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-white p-4 rounded-xl border border-gray-200">
 
         <div className="flex items-center gap-2 border border-gray-200 rounded-lg p-3">
 
@@ -129,7 +320,9 @@ function Formateur() {
         </div>
 
         <div>
-          <label className="text-sm text-gray-600">Spécialité</label>
+          <label className="text-sm text-gray-600">
+            Spécialité
+          </label>
 
           <select
             value={specialite}
@@ -145,7 +338,9 @@ function Formateur() {
         </div>
 
         <div>
-          <label className="text-sm text-gray-600">Statut</label>
+          <label className="text-sm text-gray-600">
+            Statut
+          </label>
 
           <select
             value={statut}
@@ -161,15 +356,13 @@ function Formateur() {
 
       </div>
 
-
-      {/* phase 4 */}
+      {/* tableau */}
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto">
 
         <table className="w-full text-sm text-left">
 
           <thead className="bg-gray-50 text-gray-700">
-
             <tr>
               <th className="p-4">#</th>
               <th className="p-4">Nom complet</th>
@@ -178,7 +371,6 @@ function Formateur() {
               <th className="p-4">Statut</th>
               <th className="p-4">Actions</th>
             </tr>
-
           </thead>
 
           <tbody>
@@ -190,7 +382,9 @@ function Formateur() {
                 className="border-t border-gray-100 hover:bg-gray-50"
               >
 
-                <td className="p-4">{e.id}</td>
+                <td className="p-4">
+                  {e.id}
+                </td>
 
                 <td className="p-4 font-medium text-gray-800">
                   {e.nom}
@@ -205,24 +399,26 @@ function Formateur() {
                 </td>
 
                 <td className="p-4">
-
-                  <span className="px-3 py-1 rounded-full text-xs font-medium" >
+                  <span className="px-3 py-1 rounded-full text-xs font-medium">
                     {e.statut}
                   </span>
-
                 </td>
 
                 <td className="p-4">
 
                   <div className="flex items-center gap-3">
 
-                    
-
-                    <button className="text-blue-400 hover:text-blue-500">
+                    <button
+                      type="button"
+                      onClick={() => ouvrirModification(e)}
+                     
+                      className="text-blue-400 hover:text-blue-500"
+                    >
                       <Pencil size={18} />
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => supprimerFormateur(e.id)}
                       className="text-red-600 hover:text-red-800"
                     >
@@ -236,15 +432,6 @@ function Formateur() {
               </tr>
 
             ))}
-
-            {formateursFiltres.length === 0 && (
-              <tr>
-                <td colSpan="6" className="text-center p-8 text-gray-400">
-                  Aucun formateur trouvé.
-                </td>
-              </tr>
-            )}
-
           </tbody>
 
         </table>

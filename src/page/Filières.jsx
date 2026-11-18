@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react'
 
 import {
@@ -31,9 +32,77 @@ export default function Filieres() {
     }
   ]);
 
+  const [vue, setVue] = useState("liste");
+  const [nom, setNom] = useState("");
+  const [nombreStagiaires, setNombreStagiaires] = useState("");
+  const [idModification, setIdModification] = useState(null);
+  const [prochainId, setProchainId] = useState(4);
+
+
   const supprimerFiliere = (id) => {
     setFilieres(filieres.filter((e) => e.id !== id));
   };
+
+
+  function ouvrirAjout() {
+    setNom("");
+    setNombreStagiaires("");
+    setIdModification(null);
+    setVue("formulaire");
+  }
+
+
+  function ouvrirModification(e) {
+    setNom(e.nom);
+    setNombreStagiaires(e.nombreStagiaires);
+    setIdModification(e.id);
+    setVue("formulaire");
+  }
+
+
+  function ajouter() {
+    setFilieres([
+      ...filieres,
+      {
+        id: prochainId,
+        nom: nom,
+        nombreStagiaires: Number(nombreStagiaires)
+      }
+    ]);
+
+    setProchainId(prochainId + 1);
+  }
+
+
+  function modifier() {
+    setFilieres(
+      filieres.map((e) => {
+        if (e.id === idModification) {
+          return {
+            ...e,
+            nom: nom,
+            nombreStagiaires: Number(nombreStagiaires)
+          };
+        }
+
+        return e;
+      })
+    );
+  }
+
+
+  function enregistrer(event) {
+    event.preventDefault();
+
+    if (idModification === null) {
+      ajouter();
+    } else {
+      modifier();
+    }
+
+    setVue("liste");
+  }
+
 
   const totalFilieres = filieres.length;
 
@@ -41,7 +110,81 @@ export default function Filieres() {
 
   const max = Math.max(...filieres.map(e => e.nombreStagiaires));
 
-const filiereDemandee = filieres.find(e => e.nombreStagiaires === max)?.nom || "Aucune";
+  const filiereDemandee = filieres.find(e => e.nombreStagiaires === max)?.nom || "Aucune";
+
+  if (vue === "formulaire") {
+
+    let titre = "Ajouter une filière";
+
+    if (idModification !== null) {
+      titre = "Modifier une filière";
+    }
+
+    return (
+      <div className="space-y-5">
+
+        <h1 className="text-2xl font-bold text-gray-800">
+          {titre}
+        </h1>
+
+        <form
+          onSubmit={enregistrer}
+          className="bg-white border border-gray-200 rounded-xl p-5 space-y-5"
+        >
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <label className="block text-gray-600">
+              Nom de la filière
+
+              <input
+                type="text"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+            </label>
+
+            <label className="block text-gray-600">
+              Nombre de stagiaires
+
+              <input
+                type="number"
+                min="0"
+                value={nombreStagiaires}
+                onChange={(e) => setNombreStagiaires(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+            </label>
+
+          </div>
+
+          <div className="flex flex-wrap gap-3 justify-end">
+
+            <button
+              type="button"
+              onClick={() => setVue("liste")}
+              className="border border-gray-200 rounded-lg px-5 py-3"
+            >
+              Annuler
+            </button>
+
+            <button
+              type="submit"
+              className="bg-blue-600 text-white rounded-lg px-5 py-3 hover:bg-blue-700"
+            >
+              Enregistrer
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+    );
+  }
 
 
   return (
@@ -61,7 +204,10 @@ const filiereDemandee = filieres.find(e => e.nombreStagiaires === max)?.nom || "
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-blue-600 rounded-lg text-white px-5 py-3 hover:bg-blue-700 duration-300">
+        <button
+          onClick={ouvrirAjout}
+          className="flex items-center gap-2 bg-blue-600 rounded-lg text-white px-5 py-3 hover:bg-blue-700 duration-300"
+        >
           <Plus size={20} />
           Ajouter une filiere
         </button>
@@ -203,7 +349,10 @@ const filiereDemandee = filieres.find(e => e.nombreStagiaires === max)?.nom || "
 
                   <div className="flex items-center gap-3">
 
-                    <button className="text-blue-600 hover:text-blue-800">
+                    <button
+                      onClick={() => ouvrirModification(e)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       <Pencil size={18} />
                     </button>
 

@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react'
 
 import {
   Plus,
   Search,
-  
   Pencil,
   Trash2,
   Building2,
@@ -60,6 +58,111 @@ export default function Entreprises() {
   const [statut, setStatut] = useState("Tous les statuts");
 
 
+  const [vue, setVue] = useState("liste");
+
+  const [nom, setNom] = useState("");
+  const [secteurForm, setSecteurForm] = useState("Informatique");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [statutForm, setStatutForm] = useState("Partenaire");
+  const [stages, setStages] = useState("");
+
+  const [idModification, setIdModification] = useState(null);
+  const [prochainId, setProchainId] = useState(5);
+
+
+  function ouvrirAjout() {
+
+    setNom("");
+    setSecteurForm("Informatique");
+    setEmail("");
+    setTelephone("");
+    setStatutForm("Partenaire");
+    setStages("");
+    setIdModification(null);
+    setVue("formulaire");
+
+  }
+
+
+  function ouvrirModification(e) {
+
+    setNom(e.nom);
+    setSecteurForm(e.secteur);
+    setEmail(e.email);
+    setTelephone(e.telephone);
+    setStatutForm(e.statut);
+    setStages(e.stages);
+    setIdModification(e.id);
+    setVue("formulaire");
+
+  }
+
+
+  function ajouter() {
+
+    setEntreprises([
+      ...entreprises,
+      {
+        id: prochainId,
+        nom: nom,
+        secteur: secteurForm,
+        email: email,
+        telephone: telephone,
+        statut: statutForm,
+        stages: Number(stages)
+      }
+    ]);
+
+    setProchainId(prochainId + 1);
+
+  }
+
+
+  function modifier() {
+
+    setEntreprises(
+      entreprises.map((e) => {
+
+        if (e.id === idModification) {
+          return {
+            ...e,
+            nom: nom,
+            secteur: secteurForm,
+            email: email,
+            telephone: telephone,
+            statut: statutForm,
+            stages: Number(stages)
+          };
+        }
+
+        return e;
+
+      })
+    );
+
+  }
+
+
+  function enregistrer(event) {
+
+    event.preventDefault();
+
+    if (idModification === null) {
+      ajouter();
+    } else {
+      modifier();
+    }
+
+    setRecherche("");
+    setSecteur("Tous les secteurs");
+    setStatut("Tous les statuts");
+
+    setVue("liste");
+
+  }
+
+
 
   const entreprisesFiltrees = entreprises.filter((e) => {
     return (
@@ -77,6 +180,155 @@ export default function Entreprises() {
   const supprimerEntreprise = (id) => {
     setEntreprises(entreprises.filter((e) => e.id !== id));
   };
+
+
+  if (vue === "formulaire") {
+
+    let titre = "Ajouter une entreprise";
+
+    if (idModification !== null) {
+      titre = "Modifier une entreprise";
+    }
+
+    return (
+
+      <div className="space-y-5">
+
+        <h1 className="text-2xl font-bold text-gray-800">
+          {titre}
+        </h1>
+
+        <form
+          onSubmit={enregistrer}
+          className="bg-white border border-gray-200 rounded-xl p-5 space-y-5"
+        >
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <label className="block text-gray-600">
+
+              Nom de l'entreprise
+
+              <input
+                type="text"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+
+            </label>
+
+
+            <label className="block text-gray-600">
+
+              Secteur d'activité
+
+              <select
+                value={secteurForm}
+                onChange={(e) => setSecteurForm(e.target.value)}
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              >
+                <option>Informatique</option>
+                <option>Automobile</option>
+                <option>Industrie</option>
+                <option>Télécommunications</option>
+              </select>
+
+            </label>
+
+
+            <label className="block text-gray-600">
+
+              Email
+
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+
+            </label>
+
+
+            <label className="block text-gray-600">
+
+              Téléphone
+
+              <input
+                type="tel"
+                value={telephone}
+                onChange={(e) => setTelephone(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+
+            </label>
+
+
+            <label className="block text-gray-600">
+
+              Statut
+
+              <select
+                value={statutForm}
+                onChange={(e) => setStatutForm(e.target.value)}
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              >
+                <option>Partenaire</option>
+                <option>Inactif</option>
+              </select>
+
+            </label>
+
+
+            <label className="block text-gray-600">
+
+              Nombre de stages
+
+              <input
+                type="number"
+                min="0"
+                value={stages}
+                onChange={(e) => setStages(e.target.value)}
+                required
+                className="block w-full border border-gray-200 rounded-lg p-3 mt-1"
+              />
+
+            </label>
+
+          </div>
+
+
+          <div className="flex flex-wrap gap-3 justify-end">
+
+            <button
+              type="button"
+              onClick={() => setVue("liste")}
+              className="border border-gray-200 rounded-lg px-5 py-3"
+            >
+              Annuler
+            </button>
+
+
+            <button
+              type="submit"
+              className="bg-blue-600 text-white rounded-lg px-5 py-3 hover:bg-blue-700"
+            >
+              Enregistrer
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    );
+
+  }
 
 
   return (
@@ -98,7 +350,9 @@ export default function Entreprises() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 bg-blue-600 rounded-lg text-white px-5
+        <button
+          onClick={ouvrirAjout}
+          className="flex items-center gap-2 bg-blue-600 rounded-lg text-white px-5
          py-3 hover:bg-blue-700 duration-300">
           <Plus size={20} />
           Ajouter une entreprise
@@ -343,7 +597,10 @@ export default function Entreprises() {
 
                     
 
-                    <button className="text-blue-600 hover:text-blue-800">
+                    <button
+                      onClick={() => ouvrirModification(e)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       <Pencil size={18} />
                     </button>
 
